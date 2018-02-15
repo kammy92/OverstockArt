@@ -1,6 +1,8 @@
 package com.overstockart.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -80,19 +82,6 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl (Constants.app_url);
     }
     
-    private class CustomWebViewClient extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading (WebView view, String url) {
-            Utils.showProgressDialog (MainActivity.this, progressDialog, getResources ().getString (R.string.progress_dialog_text_loading), true);
-            view.loadUrl (url);
-            return true;
-        }
-        
-        public void onPageFinished (WebView view, String url) {
-            progressDialog.dismiss ();
-        }
-    }
-    
     @Override
     public boolean onKeyDown (int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack ()) {
@@ -120,5 +109,32 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).build ();
         dialog.show ();
+    }
+    
+    private class CustomWebViewClient extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading (WebView view, String url) {
+            if (url.startsWith ("mailto:")) {
+                startActivity (new Intent (Intent.ACTION_SENDTO, Uri.parse (url)));
+            } else if (url.startsWith ("tel:")) {
+                startActivity (new Intent (Intent.ACTION_DIAL, Uri.parse (url)));
+            } else {
+                Utils.showProgressDialog (MainActivity.this, progressDialog, getResources ().getString (R.string.progress_dialog_text_loading), true);
+                view.loadUrl (url);
+            }
+            return true;
+        }
+        
+        @Override
+        public void onReceivedError (WebView view, int errorCode, String description, String failingUrl) {
+            if (view.canGoBack ()) {
+                view.goBack ();
+            }
+            Utils.showToast (MainActivity.this, description, false);
+        }
+        
+        public void onPageFinished (WebView view, String url) {
+            progressDialog.dismiss ();
+        }
     }
 }

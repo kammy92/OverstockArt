@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown (int keyCode, KeyEvent event) {
         if ((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack ()) {
+            Utils.showProgressDialog (MainActivity.this, progressDialog, getResources ().getString (R.string.progress_dialog_text_loading), true);
             webView.goBack ();
             return true;
         }
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             if (view.canGoBack ()) {
                 view.goBack ();
             }
-            Utils.showToast (MainActivity.this, description, false);
+//            Utils.showToast (MainActivity.this, description, false);
         }
         
         public void onPageFinished (WebView view, String url) {
